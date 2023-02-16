@@ -121,6 +121,32 @@ public:
         : size_(0) {
     }
 
+    SingleLinkedList(std::initializer_list<Type> values) {
+        SingleLinkedList<Type> tmp;
+        for (auto it = rbegin(values); it != rend(values); ++it) {
+            tmp.PushFront(*it);
+        }
+        swap(tmp);
+    }
+
+    SingleLinkedList(const SingleLinkedList& other) {
+        SingleLinkedList tmp1;
+        for(const auto item : other) {
+            tmp1.PushFront(item);
+        }
+        SingleLinkedList tmp2;
+        for(const auto item : tmp1) {
+            tmp2.PushFront(item);
+        }
+        swap(tmp2);
+    }
+
+    SingleLinkedList& operator=(const SingleLinkedList& rhs) {
+       SingleLinkedList tmp(rhs);
+       swap(tmp);
+       return *this;
+    }
+
     ~SingleLinkedList() {
         Clear();
     }
@@ -172,6 +198,12 @@ public:
         return ConstIterator{nullptr};
     }
 
+    // Обменивает содержимое списков за время O(1)
+    void swap(SingleLinkedList& other) noexcept {
+        std::swap(head_.next_node, other.head_.next_node);
+        std::swap(size_, other.size_);
+    }
+
     void PushFront(const Type& value) {
         head_.next_node = new Node(value, head_.next_node);
         ++size_;
@@ -199,5 +231,40 @@ public:
 private:
     // Фиктивный узел, используется для вставки "перед первым элементом"
     Node head_;
-    size_t size_;
+    size_t size_ = 0;
 };
+
+template <typename Type>
+void swap(SingleLinkedList<Type>& lhs, SingleLinkedList<Type>& rhs) noexcept {
+    lhs.swap(rhs);
+}
+
+template <typename Type>
+bool operator==(const SingleLinkedList<Type>& lhs, const SingleLinkedList<Type>& rhs) {
+    return std::equal(lhs.begin(), lhs.end(), rhs.begin());;
+}
+
+template <typename Type>
+bool operator!=(const SingleLinkedList<Type>& lhs, const SingleLinkedList<Type>& rhs) {
+    return !(lhs == rhs);
+}
+
+template <typename Type>
+bool operator<(const SingleLinkedList<Type>& lhs, const SingleLinkedList<Type>& rhs) {
+    return std::lexicographical_compare(lhs.begin(), lhs.end(), rhs.begin(), rhs.end());
+}
+
+template <typename Type>
+bool operator<=(const SingleLinkedList<Type>& lhs, const SingleLinkedList<Type>& rhs) {
+    return !(rhs < lhs);
+}
+
+template <typename Type>
+bool operator>(const SingleLinkedList<Type>& lhs, const SingleLinkedList<Type>& rhs) {
+    return rhs < lhs;
+}
+
+template <typename Type>
+bool operator>=(const SingleLinkedList<Type>& lhs, const SingleLinkedList<Type>& rhs) {
+    return !(lhs < rhs);
+}
